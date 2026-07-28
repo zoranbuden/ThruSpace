@@ -79,7 +79,35 @@ See ThruSpace-Abstract.md for a concise research summary.
 
 Demo
 A demo can be linked here once published (GitHub Pages, WebGL, video, or external link).
+LICENSE
+ThruSpace is proprietary intellectual property. Development use is allowed; commercial use is strictly prohibited without a paid license.
 
+Full patent documentation is available upon request.
+For licensing or acquisition, contact: zoranbuden@gmail.com
+
+📌 Allowed (Development License)
+Research
+
+Prototyping
+
+Testing
+
+Non‑commercial experimentation
+
+Academic exploration
+
+📌 Not Allowed (Commercial License Required)
+Commercial integration
+
+Closed‑source use
+
+XR/AI platform integration
+
+Robotics / simulation deployment
+
+Selling or sublicensing
+
+Using derivative works commercially
 Contact
 Zoran Buden  
 Email: zoranbuden@gmail.com
