@@ -109,6 +109,7 @@ Selling or sublicensing
 
 Using derivative works commercially
 Commercial License Template is included in this repository for reference only.
+
 Contact
 Zoran Buden  
 Email: zoranbuden@gmail.com
