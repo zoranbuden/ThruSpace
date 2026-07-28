@@ -1,30 +1,48 @@
 ThruSpace — AI‑Native Spatial Geometry Engine
-ThruSpace is a patented AI‑native spatial geometry engine designed for interval‑based reasoning, contact‑point semantics, modal consistency (CART / POLAR / SPHERE), and declarative spatial layout (TSL).
-It provides a new foundation for XR/AI systems that require reliable spatial logic, constraint solving, and structural validation.
+ThruSpace is an AI‑native spatial geometry engine designed for deterministic interval‑based reasoning, modal consistency, and declarative spatial layout. It provides a unified geometric foundation for XR/AI systems that require stable spatial logic, constraint solving, and structural validation across multiple modal domains.
 
 Core Concepts
-Interval Geometry Model — continuous spatial reasoning
+Interval Geometry Model
+A continuous spatial reasoning framework based on deterministic interval transitions, stable boundaries, and contact‑point semantics.
 
-CART / POLAR / SPHERE Modal Systems — multi‑modal consistency
+Modal Systems (CART / POLAR / SPHERE)
+Three complementary modal frameworks enabling consistent geometric behavior across Cartesian, radial, and spherical domains.
 
-Contact‑Point Semantics — structural interaction logic
+CART — axis‑aligned modal reasoning
 
-TSL (ThruSpace Layout) — declarative spatial layout language
+POLAR — radial and angular consistency
 
-AI‑Native Engine Architecture — designed for XR, robotics, and intelligent systems
+SPHERE — global 3D modal coherence
+
+TSL — ThruSpace Layout Language
+A declarative spatial layout language that expresses structure through high‑level rules rather than imperative positioning.
 
 Why ThruSpace
-ThruSpace introduces a unified spatial reasoning framework that enables:
+Modern XR/AI systems require spatial reasoning that is:
 
-consistent multi‑modal geometry
+deterministic
+
+multi‑modal
+
+constraint‑driven
+
+structurally stable
+
+mathematically consistent
+
+ThruSpace provides:
+
+unified interval geometry
 
 deterministic contact logic
+
+modal coherence across domains
+
+declarative layout inference
 
 stable constraint solving
 
 XR‑ready spatial validation
-
-AI‑driven structural inference
 
 Applications
 XR / AR / VR spatial computing
@@ -33,11 +51,34 @@ robotics navigation
 
 AI scene understanding
 
+geometry‑driven simulation
+
 structural modeling
 
-interval‑based simulation
+interval‑based reasoning systems
 
-geometry‑driven reasoning systems
+intelligent spatial agents
+
+Documentation
+All technical documentation is available in the /docs folder:
+
+CART.md — Cartesian modal system
+
+POLAR.md — radial modal system
+
+SPHERE.md — spherical modal system
+
+IntervalGeometry.md — interval geometry model
+
+TSL.md — declarative layout language
+
+Practical examples are available in /examples.
+
+Technical Abstract
+See ThruSpace-Abstract.md for a concise research summary.
+
+Demo
+A demo can be linked here once published (GitHub Pages, WebGL, video, or external link).
 
 Contact
 Zoran Buden  
