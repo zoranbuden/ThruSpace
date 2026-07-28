@@ -1,0 +1,39 @@
+ThruSpace Development License Agreement
+Copyright (c) 2026 Zoran Buden
+
+This license grants limited rights to use the ThruSpace spatial geometry engine
+and all associated concepts, structures, interval models, modal domains, and
+technical methodologies ("The Work") for non-commercial development purposes.
+
+1. GRANT OF RIGHTS
+You are permitted to:
+- Study, analyze, and explore The Work.
+- Use The Work for research, prototyping, testing, and non-commercial development.
+- Create derivative works for internal, experimental, or academic purposes only.
+
+2. RESTRICTIONS
+You are NOT permitted to:
+- Use The Work or any derivative works in commercial products or services.
+- Sell, license, lease, or distribute The Work or derivative works.
+- Integrate The Work into closed-source or proprietary systems.
+- Claim ownership of The Work, its concepts, or any patentable components.
+- File patents or intellectual property claims based on The Work or its derivatives.
+
+3. COMMERCIAL USE
+Commercial use of The Work, including integration into XR/AI systems, robotics,
+simulation platforms, enterprise software, or any revenue-generating product,
+requires a separate paid Commercial License Agreement.
+
+Full patent documentation is available upon request.
+For commercial licensing or acquisition, contact: zoranbuden@gmail.com
+
+4. NO WARRANTY
+The Work is provided "as is" without warranty of any kind. The author assumes
+no responsibility for any outcome resulting from use or misuse of The Work.
+
+5. OWNERSHIP
+All intellectual property rights, including patent rights, remain exclusively
+with the author, Zoran Buden. No transfer of ownership is granted under this
+license.
+
+By using The Work, you agree to the terms of this Development License Agreement.
