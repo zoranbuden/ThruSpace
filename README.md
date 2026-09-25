@@ -110,9 +110,9 @@ Patent pending; no patent has been granted. Documentation available on request.
 
 ## Licence
 
-Development use — research, prototyping, testing, teaching, non-commercial experimentation — is permitted.
-Commercial use requires a paid licence. See the licence file in this repository, and
-`Commercial-License-Template` for reference.
+Source-available, not open source. Research, prototyping, testing, teaching and personal non-commercial
+projects are permitted without asking. Commercial use requires a written licence — see
+[LICENSE.md](LICENSE.md), or just write and ask.
 
 ## Contact
 
