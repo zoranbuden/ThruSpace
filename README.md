@@ -1,118 +1,122 @@
-ThruSpace — AI‑Native Spatial Geometry Engine
-ThruSpace is an AI‑native spatial geometry engine designed for deterministic interval‑based reasoning, modal consistency, and declarative spatial layout. It provides a unified geometric foundation for XR/AI systems that require stable spatial logic, constraint solving, and structural validation across multiple modal domains.
+# ThruSpace
 
-Core Concepts
-Interval Geometry Model
-A continuous spatial reasoning framework based on deterministic interval transitions, stable boundaries, and contact‑point semantics.
+A layout engine where a square and a circle share the same space, and you never say which one you are in.
 
-Modal Systems (CART / POLAR / SPHERE)
-Three complementary modal frameworks enabling consistent geometric behavior across Cartesian, radial, and spherical domains.
+Every layout engine in common use gives you a rectangle. If you want something arranged *around* a point
+instead of *inside* a box, you go back to writing sine and cosine by hand. ThruSpace keeps both frames
+available at once, in two dimensions or three, and works out which one you meant from the properties you set.
 
-CART — axis‑aligned modal reasoning
+### → **[Open the live demo](https://zoranbuden.github.io/ThruSpace/demo.html)**
 
-POLAR — radial and angular consistency
+Three things to try there: drag the sliders and watch the layout hold its proportions; add items until the
+fixed arrangement collides while the range-based one stays clear; turn the cube and see the same engine
+place real HTML elements on a sphere.
 
-SPHERE — global 3D modal coherence
+```js
+ThruSpace.layout('#space', [
+  ...ThruSpace.ring('.node', { radius: 78 }),   // eight items on the circle
+  { el: '#center', x: 0,  y: 0  },              // and two in the square
+  { el: '#corner', x: 70, y: 78 }
+]);
+```
 
-TSL — ThruSpace Layout Language
-A declarative spatial layout language that expresses structure through high‑level rules rather than imperative positioning.
+No mode is declared. `angle` and `radius` mean the circle; `x` and `y` mean the square. Both in one call.
 
-Why ThruSpace
-Modern XR/AI systems require spatial reasoning that is:
+## What it does
 
-deterministic
+**Two frames, one origin.** A rectangular frame from the container's dimensions and a circle inscribed in
+it, sharing a centre. The frame for an element is not stated — it follows from which properties you set,
+so a mismatch between a declared mode and the values given can no longer happen.
 
-multi‑modal
+**Relative units.** Coordinates run −100 to 100 as a share of half the container; radius 0 to 100 as a
+share of the inscribed circle. Nothing is a pixel, so a layout stays correct at any container size with
+no responsive code of your own.
 
-constraint‑driven
+**Ranges instead of fixed values.** Any value can be `[min, max]`. A deterministic solver walks a fixed
+sequence of positions inside the range, starting at the middle, and takes the first one that does not
+overlap anything already placed. Same input, same output, every time — no randomness, no iteration, no
+learned model.
 
-structurally stable
+**Nesting without containers.** Give any element a `space` of its own and the same square, circle and axes
+appear inside it, in its own units, with its own conflict resolution. Children know nothing about the
+outer space, so moving the parent costs no recomputation and the view hierarchy does not grow.
 
-mathematically consistent
+**A third axis that does not break the first two.** Add `z` and the square becomes a cube; add `phi` and
+the circle becomes a sphere. `phi` is measured from the axis facing the viewer and defaults to 90°, so a
+layout written without it returns numerically identical positions — checked across every arrangement from
+3 to 16 elements, where the largest `z` produced by a 2D call was 4.78 × 10⁻¹⁵.
 
-ThruSpace provides:
+## API
 
-unified interval geometry
+Three functions, seven property names, no configuration.
 
-deterministic contact logic
+```js
+ThruSpace.layout(container, items)
+// items: [{ el, x, y, z, angle, phi, radius, space }]
+// returns { placed, notes, depth }
 
-modal coherence across domains
+ThruSpace.ring(selector, { radius, start, end })   // even spread over a circle or arc
+ThruSpace.ball(selector, { radius })               // even spread over a sphere
+```
 
-declarative layout inference
+| property | meaning |
+|---|---|
+| `x` `y` | −100 to 100, share of half the container |
+| `z` | same, along the depth axis; its presence makes the frame a cube |
+| `angle` | degrees from the positive x-axis |
+| `phi` | degrees from the axis facing you; 90 is the screen plane |
+| `radius` | 0 to 100, share of the inscribed circle or sphere |
+| `space` | a list of items placed inside this element, in its own units |
+| any of them | may be `[min, max]` instead of a number |
 
-stable constraint solving
+`notes` reports which elements the solver had to move and where it put them.
 
-XR‑ready spatial validation
+## Where this sits
 
-Applications
-XR / AR / VR spatial computing
+Constraint solvers already spare you from computing final pixel positions, and they do it well. What none
+of the mainstream engines offer is a non-rectangular frame.
 
-robotics navigation
+| Engine | Relative positioning | Polar / radial frame | Ranges rather than fixed values |
+|---|---|---|---|
+| CSS Flexbox / Grid | yes | no | no |
+| Android ConstraintLayout | yes | no | no |
+| Apple Auto Layout | yes | no | inequalities only |
+| ThruSpace | yes | yes | yes, with conflict resolution |
 
-AI scene understanding
+## Status
 
-geometry‑driven simulation
+Prototype. `thruspace.js` is about 190 lines with no dependencies; `demo.html` carries a copy of it and
+runs offline. No users yet.
 
-structural modeling
+**Working:** the shared square-and-circle space and its cube-and-sphere extension, frame inference, even
+distribution over a circle, arc or sphere, relative units, nesting to any depth, and range solving with
+overlap avoidance in all three axes.
 
-interval‑based reasoning systems
+**Not built:** contact relations between elements, and anything that targets a headset rather than a page.
 
-intelligent spatial agents
+**Known limits:** the overlap test is axis-aligned, which is forgiving for circular arrangements; the
+solver resolves conflicts in the order elements are given rather than globally; and none of this has been
+used by anyone but its author.
 
-Documentation
-All technical documentation is available in the /docs folder:
+## Patents
 
-CART.md — Cartesian modal system
+Two German patent applications are pending:
 
-POLAR.md — radial modal system
+- **DE 10 2026 004 760.9**, received 18 September 2026 — the methods described here: frame inference,
+  relative units, the deterministic range solver, nesting, and the third axis.
+- A second application covering the wider geometry model.
 
-SPHERE.md — spherical modal system
+Patent pending; no patent has been granted. Documentation available on request.
 
-IntervalGeometry.md — interval geometry model
+## Licence
 
-TSL.md — declarative layout language
+Development use — research, prototyping, testing, teaching, non-commercial experimentation — is permitted.
+Commercial use requires a paid licence. See the licence file in this repository, and
+`Commercial-License-Template` for reference.
 
-Practical examples are available in /examples.
+## Contact
 
-Technical Abstract
-See ThruSpace-Abstract.md for a concise research summary.
+Zoran Buden — zoranbuden@gmail.com
 
-Demo
-A demo can be linked here once published (GitHub Pages, WebGL, video, or external link).
-LICENSE
-ThruSpace is proprietary intellectual property. Development use is allowed; commercial use is strictly prohibited without a paid license.
-
-Full patent documentation is available upon request.
-For licensing or acquisition, contact: zoranbuden@gmail.com
-
-📌 Allowed (Development License)
-Research
-
-Prototyping
-
-Testing
-
-Non‑commercial experimentation
-
-Academic exploration
-
-📌 Not Allowed (Commercial License Required)
-Commercial integration
-
-Closed‑source use
-
-XR/AI platform integration
-
-Robotics / simulation deployment
-
-Selling or sublicensing
-
-Using derivative works commercially
-
-Commercial License Template is included in this repository for reference only.
-
-Contact
-
-Zoran Buden  
-
-Email: zoranbuden@gmail.com
+Issues and questions are welcome. If you have ever hand-written `x = r·cos(θ)` to place something in a
+user interface, I would particularly like to hear what you were building and what you wished had existed.
