@@ -85,7 +85,17 @@
     .scene{height:330px}
     input[type=range]{width:100%}
     .ctl{width:100%}
+    pre{font-size:11px;padding:10px}
+    table{font-size:.82rem}
+    th,td{padding:8px 9px}
+    h1{font-size:1.6rem}
+    .lede{font-size:.98rem}
+    p, li{overflow-wrap:break-word}
+    code{overflow-wrap:break-word}
   }
+
+  html, body{overflow-x:hidden}
+  .wrap{overflow-x:clip}
   .duo .space{height:300px;width:100%}
   .duo h3{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
   .verdict{font-size:.82rem;font-weight:560;font-variant-numeric:tabular-nums}
@@ -147,6 +157,7 @@
   .tally b{color:var(--circle);font-variant-numeric:tabular-nums;white-space:nowrap}
 
   /* ---- table ---- */
+  .tablewrap{width:100%;overflow-x:auto}
   table{width:100%;border-collapse:collapse;margin-top:22px;font-size:.92rem}
   th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}
   th{color:var(--dim);font-weight:560;font-size:.82rem}
@@ -271,7 +282,7 @@ for (let i = 0; i &lt; n; i++) {
   <p class="kicker">Constraint solvers already spare you from computing final pixel positions, and they do it well.
      What none of the mainstream engines offer is a non-rectangular frame.</p>
 
-  <table>
+  <div class="tablewrap"><table>
     <thead>
       <tr><th>Engine</th><th>Relative positioning</th><th>Polar / radial frame</th><th>Ranges rather than fixed values</th></tr>
     </thead>
@@ -281,7 +292,7 @@ for (let i = 0; i &lt; n; i++) {
       <tr><td>Apple Auto Layout</td><td class="mark-yes">yes</td><td class="mark-no">no</td><td class="mark-no">inequalities only</td></tr>
       <tr><td>ThruSpace</td><td class="mark-yes">yes</td><td class="mark-yes">yes</td><td class="mark-yes">yes, with conflict resolution</td></tr>
     </tbody>
-  </table>
+  </table></div>
 
   <p class="kicker" style="margin-top:20px">
     The last column is the interesting one, and the next section is a working demonstration of it.</p>
@@ -472,7 +483,7 @@ ThruSpace.ball(selector, { radius })
 
     <div class="panel">
       <h3>Properties</h3>
-      <table style="margin-top:0">
+      <div class="tablewrap"><table style="margin-top:0">
         <tbody>
           <tr><td><code>x</code> <code>y</code></td><td>−100 to 100, share of half the container</td></tr>
           <tr><td><code>z</code></td><td>same, along the depth axis; its presence makes the frame a cube</td></tr>
@@ -482,7 +493,7 @@ ThruSpace.ball(selector, { radius })
           <tr><td>any of them</td><td>may be <code>[min, max]</code> instead of a number</td></tr>
           <tr><td><code>space</code></td><td>a list of items placed inside this element, in its own units</td></tr>
         </tbody>
-      </table>
+      </table></div>
     </div>
   </div>
 
