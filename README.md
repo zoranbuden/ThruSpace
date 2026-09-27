@@ -37,6 +37,12 @@ sequence of positions inside the range, starting at the middle, and takes the fi
 overlap anything already placed. Same input, same output, every time — no randomness, no iteration, no
 learned model.
 
+**Positioning against another element.** Instead of a coordinate, give an element `at: otherElement`. With
+an `angle` it is placed touching that element in that direction — the engine works out how far apart their
+edges meet — and `gap` adds space beyond the touch. With `align: 'x'` or `'y'` it shares one axis and keeps
+its own value on the other. Contacts resolve in repeated passes, so chains work and order in the list does
+not matter.
+
 **Nesting without containers.** Give any element a `space` of its own and the same square, circle and axes
 appear inside it, in its own units, with its own conflict resolution. Children know nothing about the
 outer space, so moving the parent costs no recomputation and the view hierarchy does not grow.
@@ -48,11 +54,11 @@ layout written without it returns numerically identical positions — checked ac
 
 ## API
 
-Three functions, seven property names, no configuration.
+Three functions, nine property names, no configuration.
 
 ```js
 ThruSpace.layout(container, items)
-// items: [{ el, x, y, z, angle, phi, radius, space }]
+// items: [{ el, x, y, z, angle, phi, radius, space, at, gap }]
 // returns { placed, notes, depth }
 
 ThruSpace.ring(selector, { radius, start, end })   // even spread over a circle or arc
@@ -67,6 +73,8 @@ ThruSpace.ball(selector, { radius })               // even spread over a sphere
 | `phi` | degrees from the axis facing you; 90 is the screen plane |
 | `radius` | 0 to 100, share of the inscribed circle or sphere |
 | `space` | a list of items placed inside this element, in its own units |
+| `at` | another element to position against instead of the frame |
+| `gap` | extra pixels beyond touching, used with `at` and `angle` |
 | any of them | may be `[min, max]` instead of a number |
 
 `notes` reports which elements the solver had to move and where it put them.
@@ -89,10 +97,10 @@ Prototype. `thruspace.js` is about 190 lines with no dependencies; `demo.html` c
 runs offline. No users yet.
 
 **Working:** the shared square-and-circle space and its cube-and-sphere extension, frame inference, even
-distribution over a circle, arc or sphere, relative units, nesting to any depth, and range solving with
-overlap avoidance in all three axes.
+distribution over a circle, arc or sphere, relative units, nesting to any depth, positioning against another element, and range solving with overlap
+avoidance in all three axes.
 
-**Not built:** contact relations between elements, and anything that targets a headset rather than a page.
+**Not built:** anything that targets a headset rather than a page.
 
 **Known limits:** the overlap test is axis-aligned, which is forgiving for circular arrangements; the
 solver resolves conflicts in the order elements are given rather than globally; and none of this has been

@@ -7,6 +7,11 @@
    radius  : 0..100, share of the inscribed circle or sphere
    any value may be a range: [min, max]
    space   : a list of items placed inside this element, in its own units
+   at      : another element to position against, instead of the frame
+             with angle : placed touching it in that direction (plus gap)
+             with align : 'x' or 'y' shares that axis only
+             alone      : centres coincide
+   gap     : extra pixels beyond touching, used with at + angle
 */
 (function (global) {
   'use strict';
@@ -87,9 +92,26 @@
       return { x: pos.x / 100 * halfW, y: pos.y / 100 * halfH, z: pos.z / 100 * ringR };
     }
 
-    items.forEach(function (spec){
+    /* map from element to its settled position, so contacts can refer to it */
+    var settled = [];
+    function settledFor(target){
+      var node = typeof target === 'string' ? document.querySelector(target) : target;
+      for (var i = 0; i < settled.length; i++) if (settled[i].el === node) return settled[i].pos;
+      return null;
+    }
+
+    /* distance along a direction at which two boxes first touch */
+    function touchDistance(a, b, ang){
+      var ca = Math.abs(Math.cos(ang)), sa = Math.abs(Math.sin(ang));
+      var t = Infinity;
+      if (ca > 1e-9) t = Math.min(t, (a.hw + b.hw) / ca);
+      if (sa > 1e-9) t = Math.min(t, (a.hh + b.hh) / sa);
+      return isFinite(t) ? t : 0;
+    }
+
+    function place(spec){
       var el = typeof spec.el === 'string' ? document.querySelector(spec.el) : spec.el;
-      if (!el) return;
+      if (!el) return true;
 
       el.style.position = 'absolute';
       el.style.left = '50%';
@@ -110,7 +132,25 @@
         return { x: px.x, y: px.y, z: px.z, hw: hw, hh: hh, hd: Math.min(hw, hh), unit: unit };
       }
 
-      if (!flexible){
+      if (has(spec, 'at')){
+        /* position is taken from another element rather than from the frame */
+        var ref = settledFor(spec.at);
+        if (!ref) return false;                     /* reference not settled yet */
+
+        var own = candidate(0.5);
+        pos = { x: ref.x, y: ref.y, z: ref.z, hw: hw, hh: hh, hd: Math.min(hw, hh), unit: own.unit };
+
+        if (has(spec, 'angle')){
+          var a = sample(spec.angle, 0.5) * RAD;
+          var d = touchDistance(ref, pos, a) + (spec.gap || 0);
+          pos.x = ref.x + d * Math.cos(a);
+          pos.y = ref.y + d * Math.sin(a);
+        } else if (spec.align === 'x'){
+          pos.y = own.y;
+        } else if (spec.align === 'y'){
+          pos.x = own.x;
+        }
+      } else if (!flexible){
         pos = candidate(0.5);
         clash = placed.some(function(p){ return overlaps(p, pos); });
         if (clash) notes.push({ el: el, text: 'fixed position overlaps and has no range to move within' });
@@ -126,14 +166,15 @@
       }
 
       placed.push(pos);
+      settled.push({ el: el, pos: pos });
 
       el.style.transform = (Math.abs(pos.z) < 0.01)
         ? 'translate(calc(-50% + ' + pos.x.toFixed(2) + 'px), calc(-50% - ' + pos.y.toFixed(2) + 'px))'
         : 'translate3d(' + pos.x.toFixed(2) + 'px, ' + (-pos.y).toFixed(2) + 'px, ' +
           pos.z.toFixed(2) + 'px) translate(-50%, -50%)';
 
-      spec._frame = frame;
-      spec._resolved = { x: pos.unit.x, y: pos.unit.y, z: pos.unit.z, t: usedT };
+      spec._frame = has(spec, 'at') ? 'contact' : frame;
+      spec._resolved = { x: pos.x, y: pos.y, z: pos.z, t: usedT };
 
       /* an element is itself a space: its children are placed against its own
          square, circle and axes, in its own units, with its own conflicts */
@@ -144,6 +185,21 @@
       } else {
         spec._depth = 0;
       }
+      return true;
+    }
+
+    /* repeated passes so a contact may name an element listed after it */
+    var waiting = items.slice(), guard = 0;
+    while (waiting.length && guard++ < 10){
+      var again = [];
+      for (var k = 0; k < waiting.length; k++){
+        if (!place(waiting[k])) again.push(waiting[k]);
+      }
+      if (again.length === waiting.length) break;   /* no progress */
+      waiting = again;
+    }
+    waiting.forEach(function (spec){
+      notes.push({ el: spec.el, text: 'contact target not found, element left unplaced' });
     });
 
     var depth = items.reduce(function (d, it){

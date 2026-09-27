@@ -81,6 +81,9 @@
     .slot{width:32px;height:32px}
     .duo .space{height:280px}
     #nest{height:360px}
+    #dial{height:340px}
+    .pin{width:22px;height:22px;font-size:.64rem}
+    .tagline{font-size:.62rem;padding:3px 5px}
     .space{height:360px}
     .scene{height:330px}
     input[type=range]{width:100%}
@@ -137,6 +140,16 @@
     display:inline-block;margin-left:8px;font-size:.78rem;color:var(--mark);
     font-variant-numeric:tabular-nums;
   }
+
+  #dial{position:relative;width:100%;max-width:560px;height:400px;
+    border:1px solid rgba(255,255,255,.1);border-radius:4px}
+  #dial svg{position:absolute;inset:0;pointer-events:none}
+  .pin{width:26px;height:26px;border-radius:50%;background:var(--mark);
+    color:#11141b;font:620 .7rem/1 inherit;display:flex;align-items:center;justify-content:center}
+  .tagline{background:#28313f;border:1px solid rgba(255,255,255,.14);color:var(--ink);
+    font-size:.7rem;padding:4px 8px;border-radius:4px;white-space:nowrap}
+  .hubdot{width:64px;height:64px;border-radius:50%;
+    border:1px solid rgba(232,163,61,.5);background:rgba(232,163,61,.06)}
 
   .corner{
     background:#28313f;border:1px solid rgba(255,255,255,.16);color:var(--ink);
@@ -409,6 +422,54 @@ for (let i = 0; i &lt; n; i++) {
 </section>
 
 <section>
+  <h2>Positioning against another element</h2>
+  <p class="kicker">Everything so far places an element against the frame. An element can instead be placed
+     against another element: touching it in a given direction, or sharing one of its axes. The label then
+     follows whatever its anchor does, and nothing has to be recomputed when the anchor moves.</p>
+
+  <div class="lab">
+    <div class="controls">
+      <div class="ctl">
+        <label>Pins on the circle — <b id="dcv">6</b></label>
+        <input type="range" id="dcctl" min="3" max="9" value="6">
+      </div>
+      <div class="ctl">
+        <label>Gap between pin and label — <b id="dgv">6px</b></label>
+        <input type="range" id="dgctl" min="0" max="30" value="6">
+      </div>
+    </div>
+
+    <div class="nestbox">
+      <div id="dial"><svg id="dialAxes" aria-hidden="true"></svg></div>
+    </div>
+
+    <div class="cols" style="margin-top:18px">
+      <div class="panel">
+        <h3>What that looks like</h3>
+<pre>// the pin sits on the circle
+{ el: pin, angle: a, radius: 62 }
+
+// the label touches it, pointing outward
+{ el: label, at: pin, angle: a, gap: 6 }
+
+// and this one shares the hub's x axis
+{ el: caption, at: '#hub', align: 'x', y: -64 }</pre>
+      </div>
+      <div class="panel">
+        <h3>How the distance is found</h3>
+        <p style="color:var(--dim);font-size:.92rem;margin:0 0 12px">
+          Given a direction, the engine computes how far apart the two elements must sit for their edges to
+          meet, and places the second one there. Move the gap slider and the labels step outward together;
+          none of the angles change.</p>
+        <p style="color:var(--dim);font-size:.92rem;margin:0">
+          Contacts are resolved in repeated passes, so an element may name an anchor that appears later in
+          the list, and chains work: a label attached to a pin attached to the circle.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
   <h2>An element is also a space</h2>
   <p class="kicker">Nothing above treats a container as special. Give any element a <code>space</code> of its own
      and the same square, circle and axes appear inside it, in its own units, with its own conflict resolution.
@@ -468,7 +529,7 @@ for (let i = 0; i &lt; n; i++) {
     <div class="panel">
       <h3>Calls</h3>
 <pre>ThruSpace.layout(container, items)
-  // items: [{ el, x, y, z, angle, phi, radius, space }]
+  // items: [{ el, x, y, z, angle, phi, radius, space, at, gap }]
   // returns { placed, notes, depth }
 
 ThruSpace.ring(selector, { radius, start, end })
@@ -492,6 +553,8 @@ ThruSpace.ball(selector, { radius })
           <tr><td><code>radius</code></td><td>0 to 100, share of the inscribed circle or sphere</td></tr>
           <tr><td>any of them</td><td>may be <code>[min, max]</code> instead of a number</td></tr>
           <tr><td><code>space</code></td><td>a list of items placed inside this element, in its own units</td></tr>
+          <tr><td><code>at</code></td><td>another element to position against instead of the frame</td></tr>
+          <tr><td><code>gap</code></td><td>extra pixels beyond touching, used with <code>at</code> and <code>angle</code></td></tr>
         </tbody>
       </table></div>
     </div>
@@ -504,8 +567,9 @@ ThruSpace.ball(selector, { radius })
 <section>
   <h2>Status</h2>
   <ul>
-    <li><span>Working:</span> the shared square-and-circle space and its cube-and-sphere extension, frame inference, even distribution over a circle, arc or sphere, relative units, nesting to any depth, and range solving with overlap avoidance in all three axes. No dependencies, about 200 lines, every demo on this page runs on it.</li>
-    <li><span>Not built:</span> contact relations between elements, and anything that targets a headset rather than a page.</li>
+    <li><span>Working:</span> the shared square-and-circle space and its cube-and-sphere extension, frame inference, even distribution over a circle, arc or sphere, relative units, nesting to any depth, positioning against another element, and range solving with overlap
+     avoidance in all three axes. No dependencies, about 200 lines, every demo on this page runs on it.</li>
+    <li><span>Not built:</span> anything that targets a headset rather than a page.</li>
     <li><span>Filed:</span> a German patent application covering what this page demonstrates — frame inference, relative units, the deterministic range solver, nesting and the third axis — received by the DPMA on 18 September 2026 under 10 2026 004 760.9. A second application covering the wider geometry model is also pending. Prototype stage, no users yet.</li>
   </ul>
   <p class="kicker">Filed as a geometry model rather than a layout library, which is why the third axis slotted in
@@ -534,6 +598,11 @@ ThruSpace.ball(selector, { radius })
    radius  : 0..100, share of the inscribed circle or sphere
    any value may be a range: [min, max]
    space   : a list of items placed inside this element, in its own units
+   at      : another element to position against, instead of the frame
+             with angle : placed touching it in that direction (plus gap)
+             with align : 'x' or 'y' shares that axis only
+             alone      : centres coincide
+   gap     : extra pixels beyond touching, used with at + angle
 */
 (function (global) {
   'use strict';
@@ -614,9 +683,26 @@ ThruSpace.ball(selector, { radius })
       return { x: pos.x / 100 * halfW, y: pos.y / 100 * halfH, z: pos.z / 100 * ringR };
     }
 
-    items.forEach(function (spec){
+    /* map from element to its settled position, so contacts can refer to it */
+    var settled = [];
+    function settledFor(target){
+      var node = typeof target === 'string' ? document.querySelector(target) : target;
+      for (var i = 0; i < settled.length; i++) if (settled[i].el === node) return settled[i].pos;
+      return null;
+    }
+
+    /* distance along a direction at which two boxes first touch */
+    function touchDistance(a, b, ang){
+      var ca = Math.abs(Math.cos(ang)), sa = Math.abs(Math.sin(ang));
+      var t = Infinity;
+      if (ca > 1e-9) t = Math.min(t, (a.hw + b.hw) / ca);
+      if (sa > 1e-9) t = Math.min(t, (a.hh + b.hh) / sa);
+      return isFinite(t) ? t : 0;
+    }
+
+    function place(spec){
       var el = typeof spec.el === 'string' ? document.querySelector(spec.el) : spec.el;
-      if (!el) return;
+      if (!el) return true;
 
       el.style.position = 'absolute';
       el.style.left = '50%';
@@ -637,7 +723,25 @@ ThruSpace.ball(selector, { radius })
         return { x: px.x, y: px.y, z: px.z, hw: hw, hh: hh, hd: Math.min(hw, hh), unit: unit };
       }
 
-      if (!flexible){
+      if (has(spec, 'at')){
+        /* position is taken from another element rather than from the frame */
+        var ref = settledFor(spec.at);
+        if (!ref) return false;                     /* reference not settled yet */
+
+        var own = candidate(0.5);
+        pos = { x: ref.x, y: ref.y, z: ref.z, hw: hw, hh: hh, hd: Math.min(hw, hh), unit: own.unit };
+
+        if (has(spec, 'angle')){
+          var a = sample(spec.angle, 0.5) * RAD;
+          var d = touchDistance(ref, pos, a) + (spec.gap || 0);
+          pos.x = ref.x + d * Math.cos(a);
+          pos.y = ref.y + d * Math.sin(a);
+        } else if (spec.align === 'x'){
+          pos.y = own.y;
+        } else if (spec.align === 'y'){
+          pos.x = own.x;
+        }
+      } else if (!flexible){
         pos = candidate(0.5);
         clash = placed.some(function(p){ return overlaps(p, pos); });
         if (clash) notes.push({ el: el, text: 'fixed position overlaps and has no range to move within' });
@@ -653,14 +757,15 @@ ThruSpace.ball(selector, { radius })
       }
 
       placed.push(pos);
+      settled.push({ el: el, pos: pos });
 
       el.style.transform = (Math.abs(pos.z) < 0.01)
         ? 'translate(calc(-50% + ' + pos.x.toFixed(2) + 'px), calc(-50% - ' + pos.y.toFixed(2) + 'px))'
         : 'translate3d(' + pos.x.toFixed(2) + 'px, ' + (-pos.y).toFixed(2) + 'px, ' +
           pos.z.toFixed(2) + 'px) translate(-50%, -50%)';
 
-      spec._frame = frame;
-      spec._resolved = { x: pos.unit.x, y: pos.unit.y, z: pos.unit.z, t: usedT };
+      spec._frame = has(spec, 'at') ? 'contact' : frame;
+      spec._resolved = { x: pos.x, y: pos.y, z: pos.z, t: usedT };
 
       /* an element is itself a space: its children are placed against its own
          square, circle and axes, in its own units, with its own conflicts */
@@ -671,6 +776,21 @@ ThruSpace.ball(selector, { radius })
       } else {
         spec._depth = 0;
       }
+      return true;
+    }
+
+    /* repeated passes so a contact may name an element listed after it */
+    var waiting = items.slice(), guard = 0;
+    while (waiting.length && guard++ < 10){
+      var again = [];
+      for (var k = 0; k < waiting.length; k++){
+        if (!place(waiting[k])) again.push(waiting[k]);
+      }
+      if (again.length === waiting.length) break;   /* no progress */
+      waiting = again;
+    }
+    waiting.forEach(function (spec){
+      notes.push({ el: spec.el, text: 'contact target not found, element left unplaced' });
     });
 
     var depth = items.reduce(function (d, it){
@@ -1012,6 +1132,77 @@ ThruSpace.ball(selector, { radius })
   });
   lctl.addEventListener('input', function(){
     document.getElementById('nlv').textContent = lctl.value;
+    build();
+  });
+  window.addEventListener('resize', build);
+
+  build();
+})();
+
+/* ---- contacts demo ---- */
+(function(){
+  var dial = document.getElementById('dial');
+  var cctl = document.getElementById('dcctl');
+  var gctl = document.getElementById('dgctl');
+
+  function clear(){
+    Array.prototype.slice.call(dial.querySelectorAll('.pin, .tagline, .hubdot'))
+      .forEach(function(el){ el.remove(); });
+  }
+
+  function mk(cls, text){
+    var d = document.createElement('div');
+    d.className = cls;
+    if (text) d.textContent = text;
+    dial.appendChild(d);
+    return d;
+  }
+
+  function axes(){
+    var svg = document.getElementById('dialAxes');
+    var w = dial.clientWidth, h = dial.clientHeight, r = Math.min(w, h) / 2;
+    svg.setAttribute('width', w);
+    svg.setAttribute('height', h);
+    svg.innerHTML =
+      '<line x1="0" y1="'+(h/2)+'" x2="'+w+'" y2="'+(h/2)+'" stroke="#4fb3d9" stroke-opacity=".14"/>' +
+      '<line x1="'+(w/2)+'" y1="0" x2="'+(w/2)+'" y2="'+h+'" stroke="#4fb3d9" stroke-opacity=".14"/>' +
+      '<circle cx="'+(w/2)+'" cy="'+(h/2)+'" r="'+(r*(w<480?0.44:0.56))+'" fill="none" stroke="#e8a33d" stroke-opacity=".22"/>';
+  }
+
+  function build(){
+    clear(); axes();
+    var n = parseInt(cctl.value, 10);
+    var gap = parseInt(gctl.value, 10);
+
+    var tight = dial.clientWidth < 480;
+    var ringR = tight ? 44 : 56;
+
+    var hub = mk('hubdot');
+    hub.id = 'hub';
+    var caption = mk('tagline', tight ? 'hub axis' : 'shares the hub axis');
+
+    var items = [
+      { el: hub, x: 0, y: 0 },
+      { el: caption, at: '#hub', align: 'x', y: -64 }
+    ];
+
+    for (var i = 0; i < n; i++){
+      var a = 90 - (360 / n) * i;
+      var pin = mk('pin', String(i + 1));
+      var tag = mk('tagline', tight ? String(i + 1) : 'item ' + (i + 1));
+      items.push({ el: pin, angle: a, radius: ringR });
+      items.push({ el: tag, at: pin, angle: a, gap: gap });
+    }
+
+    ThruSpace.layout('#dial', items);
+  }
+
+  cctl.addEventListener('input', function(){
+    document.getElementById('dcv').textContent = cctl.value;
+    build();
+  });
+  gctl.addEventListener('input', function(){
+    document.getElementById('dgv').textContent = gctl.value + 'px';
     build();
   });
   window.addEventListener('resize', build);

@@ -12,8 +12,8 @@ or write to zoranbuden@gmail.com.
 elements are given, so there are arrangements it handles badly. A short description and the item list you
 used is enough — the demo page is a fine place to reproduce it.
 
-**Say what is missing.** Contact relations between elements are not built. Neither is anything for
-headsets. If you need something else before this would be useful to you, that is worth an issue.
+**Say what is missing.** Nothing for headsets is built. If you need something else before this would be
+useful to you, that is worth an issue.
 
 ## Code contributions
 
