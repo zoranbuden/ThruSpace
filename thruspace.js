@@ -11,7 +11,12 @@
              with angle : placed touching it in that direction (plus gap)
              with align : 'x' or 'y' shares that axis only
              alone      : centres coincide
-   gap     : extra pixels beyond touching, used with at + angle
+   gap     : extra pixels beyond touching, used with at + angle or placement
+   placement : with at, an ordered list of sides or angles; the first one
+               that does not collide is used
+               'right' 'top-right' 'top' 'top-left' 'left'
+               'bottom-left' 'bottom' 'bottom-right', or a number in degrees
+   hideIfBlocked : with placement, hide the element when no side is free
 */
 (function (global) {
   'use strict';
@@ -100,6 +105,17 @@
       return null;
     }
 
+    /* named sides, so a placement list can read like prose */
+    var SIDES = {
+      right: 0, 'top-right': 45, top: 90, 'top-left': 135,
+      left: 180, 'bottom-left': 225, bottom: 270, 'bottom-right': 315
+    };
+    function toAngle(v){
+      if (typeof v === 'number') return v;
+      var a = SIDES[String(v).toLowerCase()];
+      return a === undefined ? 0 : a;
+    }
+
     /* distance along a direction at which two boxes first touch */
     function touchDistance(a, b, ang){
       var ca = Math.abs(Math.cos(ang)), sa = Math.abs(Math.sin(ang));
@@ -140,7 +156,40 @@
         var own = candidate(0.5);
         pos = { x: ref.x, y: ref.y, z: ref.z, hw: hw, hh: hh, hd: Math.min(hw, hh), unit: own.unit };
 
-        if (has(spec, 'angle')){
+        if (Array.isArray(spec.placement) && spec.placement.length){
+          /* try each direction in turn and keep the first that is free */
+          var free = false, tried = null;
+          for (var pi = 0; pi < spec.placement.length; pi++){
+            var pa = toAngle(spec.placement[pi]) * RAD;
+            var pd = touchDistance(ref, pos, pa) + (spec.gap || 0);
+            var cand2 = {
+              x: ref.x + pd * Math.cos(pa), y: ref.y + pd * Math.sin(pa), z: ref.z,
+              hw: hw, hh: hh, hd: Math.min(hw, hh), unit: own.unit
+            };
+            tried = cand2;
+            if (!placed.some(function(p){ return overlaps(p, cand2); })){
+              pos = cand2; free = true;
+              spec._placement = spec.placement[pi];
+              break;
+            }
+          }
+          if (!free){
+            if (spec.hideIfBlocked){
+              el.style.visibility = 'hidden';
+              spec._placement = null;
+              notes.push({ el: el, text: 'no free side, hidden' });
+              return true;
+            }
+            pos = tried;
+            spec._placement = spec.placement[spec.placement.length - 1];
+            notes.push({ el: el, text: 'no free side, last one in the list used' });
+          } else {
+            el.style.visibility = '';
+            if (spec._placement !== spec.placement[0]){
+              notes.push({ el: el, text: 'moved to the ' + spec._placement + ' side' });
+            }
+          }
+        } else if (has(spec, 'angle')){
           var a = sample(spec.angle, 0.5) * RAD;
           var d = touchDistance(ref, pos, a) + (spec.gap || 0);
           pos.x = ref.x + d * Math.cos(a);

@@ -143,6 +143,23 @@
     font-variant-numeric:tabular-nums;
   }
 
+  #chart{position:relative;width:100%;max-width:620px;height:400px;
+    border:1px solid var(--line);border-radius:6px;background:rgba(255,255,255,.015)}
+  #chart svg{position:absolute;inset:0;pointer-events:none}
+  .pt{width:9px;height:9px;border-radius:50%;background:var(--mark)}
+  .ptlabel{
+    background:rgba(20,25,36,.92);border:1px solid var(--line);color:var(--ink);
+    font-size:.68rem;padding:2px 6px;border-radius:3px;white-space:nowrap;
+  }
+  .scoreboard{display:flex;gap:26px;flex-wrap:wrap;margin-top:16px}
+  .score{display:flex;flex-direction:column;gap:2px}
+  .score b{font-size:1.35rem;font-weight:620;font-variant-numeric:tabular-nums;line-height:1}
+  .score span{font-size:.76rem;color:var(--dim)}
+  .score.ok b{color:var(--circle)}
+  .score.bad b{color:#e07a7a}
+  .switch{display:flex;align-items:center;gap:8px;font-size:.84rem;color:var(--dim);cursor:pointer}
+  .switch input{width:16px;height:16px;accent-color:var(--circle);cursor:pointer}
+
   #dial{position:relative;width:100%;max-width:560px;height:400px;
     border:1px solid rgba(255,255,255,.1);border-radius:4px}
   #dial svg{position:absolute;inset:0;pointer-events:none}
@@ -263,6 +280,80 @@ for (let i = 0; i &lt; n; i++) {
     <div class="tally"><span>Trigonometry you write</span><b>none &nbsp;·&nbsp; two formulas</b></div>
     <div class="tally"><span>Code to survive a resize</span><b>none &nbsp;·&nbsp; your own</b></div>
     <div class="tally"><span>Code to change the item count</span><b>none &nbsp;·&nbsp; recompute</b></div>
+  </div>
+</section>
+
+<section>
+  <h2>Labels that find a free side</h2>
+  <p class="kicker">This is the same solver as everywhere else on this page, pointed at the problem it is
+     most useful for. Each point is fixed — it is data, it cannot move. Each label is attached to its point
+     and given an ordered list of sides to try. The first side that does not collide with anything already
+     placed is the one it takes.</p>
+
+  <div class="lab">
+    <div class="controls">
+      <div class="ctl">
+        <label>Points — <b id="cpv">14</b></label>
+        <input type="range" id="cpctl" min="4" max="26" value="14">
+      </div>
+      <div class="ctl">
+        <label>Arrangement — <b id="csv">1</b></label>
+        <input type="range" id="csctl" min="1" max="8" value="1">
+      </div>
+      <div class="ctl">
+        <label>&nbsp;</label>
+        <label class="switch"><input type="checkbox" id="chctl"> hide a label when no side is free</label>
+      </div>
+    </div>
+
+    <div class="nestbox">
+      <div id="chart"><svg id="chartGrid" aria-hidden="true"></svg></div>
+    </div>
+
+    <div class="scoreboard">
+      <div class="score ok"><b id="sc-first">0</b><span>kept the first side</span></div>
+      <div class="score"><b id="sc-moved">0</b><span>moved to another side</span></div>
+      <div class="score"><b id="sc-hidden">0</b><span>hidden</span></div>
+      <div class="score" id="sc-ovbox"><b id="sc-ov">0</b><span>overlaps involving a label</span></div>
+      <div class="score"><b id="sc-dd">0</b><span>points sitting on points</span></div>
+    </div>
+
+    <div class="cols" style="margin-top:20px">
+      <div class="panel">
+        <h3>What that looks like</h3>
+<pre>ThruSpace.layout('#chart', [
+  // the points first: fixed, they are the data
+  ...points.map(p =&gt; ({ el: p.dot, x: p.x, y: p.y })),
+
+  // then the labels, each with sides to try in order
+  ...points.map(p =&gt; ({
+    el: p.label,
+    at: p.dot,
+    gap: 3,
+    placement: ['right', 'top', 'left', 'bottom',
+                'top-right', 'bottom-right',
+                'top-left', 'bottom-left'],
+    hideIfBlocked: false
+  }))
+]);</pre>
+      </div>
+      <div class="panel">
+        <h3>Why order matters</h3>
+        <p style="color:var(--dim);font-size:.92rem;margin:0 0 12px">
+          Anchors are listed before labels on purpose. A point never moves, so if a point were placed after
+          a label it could land on top of it. With every point settled first, each label only has to find a
+          gap among things that are already final.</p>
+        <p style="color:var(--dim);font-size:.92rem;margin:0 0 12px">
+          Drag the arrangement slider: each value is a different set of points, and every one of them gives
+          the same result every time it is drawn. Nothing here is annealed, sampled or randomised, so a chart
+          rendered in a test matches the one on screen.</p>
+        <p style="color:var(--dim);font-size:.92rem;margin:0">
+          Past roughly sixteen points in this box there are not always eight free sides left, and labels
+          start to collide. Switch on hiding and that count goes to zero at every size — checked across all
+          eight arrangements. Points sitting on points is counted separately: that is the data, and no label
+          strategy can move it.</p>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -604,7 +695,12 @@ ThruSpace.ball(selector, { radius })
              with angle : placed touching it in that direction (plus gap)
              with align : 'x' or 'y' shares that axis only
              alone      : centres coincide
-   gap     : extra pixels beyond touching, used with at + angle
+   gap     : extra pixels beyond touching, used with at + angle or placement
+   placement : with at, an ordered list of sides or angles; the first one
+               that does not collide is used
+               'right' 'top-right' 'top' 'top-left' 'left'
+               'bottom-left' 'bottom' 'bottom-right', or a number in degrees
+   hideIfBlocked : with placement, hide the element when no side is free
 */
 (function (global) {
   'use strict';
@@ -693,6 +789,17 @@ ThruSpace.ball(selector, { radius })
       return null;
     }
 
+    /* named sides, so a placement list can read like prose */
+    var SIDES = {
+      right: 0, 'top-right': 45, top: 90, 'top-left': 135,
+      left: 180, 'bottom-left': 225, bottom: 270, 'bottom-right': 315
+    };
+    function toAngle(v){
+      if (typeof v === 'number') return v;
+      var a = SIDES[String(v).toLowerCase()];
+      return a === undefined ? 0 : a;
+    }
+
     /* distance along a direction at which two boxes first touch */
     function touchDistance(a, b, ang){
       var ca = Math.abs(Math.cos(ang)), sa = Math.abs(Math.sin(ang));
@@ -733,7 +840,40 @@ ThruSpace.ball(selector, { radius })
         var own = candidate(0.5);
         pos = { x: ref.x, y: ref.y, z: ref.z, hw: hw, hh: hh, hd: Math.min(hw, hh), unit: own.unit };
 
-        if (has(spec, 'angle')){
+        if (Array.isArray(spec.placement) && spec.placement.length){
+          /* try each direction in turn and keep the first that is free */
+          var free = false, tried = null;
+          for (var pi = 0; pi < spec.placement.length; pi++){
+            var pa = toAngle(spec.placement[pi]) * RAD;
+            var pd = touchDistance(ref, pos, pa) + (spec.gap || 0);
+            var cand2 = {
+              x: ref.x + pd * Math.cos(pa), y: ref.y + pd * Math.sin(pa), z: ref.z,
+              hw: hw, hh: hh, hd: Math.min(hw, hh), unit: own.unit
+            };
+            tried = cand2;
+            if (!placed.some(function(p){ return overlaps(p, cand2); })){
+              pos = cand2; free = true;
+              spec._placement = spec.placement[pi];
+              break;
+            }
+          }
+          if (!free){
+            if (spec.hideIfBlocked){
+              el.style.visibility = 'hidden';
+              spec._placement = null;
+              notes.push({ el: el, text: 'no free side, hidden' });
+              return true;
+            }
+            pos = tried;
+            spec._placement = spec.placement[spec.placement.length - 1];
+            notes.push({ el: el, text: 'no free side, last one in the list used' });
+          } else {
+            el.style.visibility = '';
+            if (spec._placement !== spec.placement[0]){
+              notes.push({ el: el, text: 'moved to the ' + spec._placement + ' side' });
+            }
+          }
+        } else if (has(spec, 'angle')){
           var a = sample(spec.angle, 0.5) * RAD;
           var d = touchDistance(ref, pos, a) + (spec.gap || 0);
           pos.x = ref.x + d * Math.cos(a);
@@ -1207,6 +1347,124 @@ ThruSpace.ball(selector, { radius })
     document.getElementById('dgv').textContent = gctl.value + 'px';
     build();
   });
+  window.addEventListener('resize', build);
+
+  build();
+})();
+
+/* ---- label placement demo ---- */
+(function(){
+  var chart = document.getElementById('chart');
+  var pctl = document.getElementById('cpctl');
+  var sctl = document.getElementById('csctl');
+  var hctl = document.getElementById('chctl');
+
+  var SIDES = ['right','top','left','bottom',
+               'top-right','bottom-right','top-left','bottom-left'];
+
+  function clear(){
+    Array.prototype.slice.call(chart.querySelectorAll('.pt, .ptlabel'))
+      .forEach(function(el){ el.remove(); });
+  }
+
+  function grid(){
+    var svg = document.getElementById('chartGrid');
+    var w = chart.clientWidth, h = chart.clientHeight;
+    svg.setAttribute('width', w);
+    svg.setAttribute('height', h);
+    var out = '';
+    for (var i = 1; i < 5; i++){
+      out += '<line x1="' + (w * i / 5) + '" y1="0" x2="' + (w * i / 5) + '" y2="' + h +
+             '" stroke="#4fb3d9" stroke-opacity=".07"/>';
+      out += '<line x1="0" y1="' + (h * i / 5) + '" x2="' + w + '" y2="' + (h * i / 5) +
+             '" stroke="#4fb3d9" stroke-opacity=".07"/>';
+    }
+    svg.innerHTML = out;
+  }
+
+  /* same arrangement every time for a given slider value */
+  function makePoints(n, seed){
+    var s = seed * 7919 + 13, out = [];
+    function rnd(){ s = (s * 1103515245 + 12345) % 2147483648; return s / 2147483648; }
+    for (var i = 0; i < n; i++){
+      out.push({ x: (rnd() * 2 - 1) * 78, y: (rnd() * 2 - 1) * 70, v: Math.round(rnd() * 900 + 100) });
+    }
+    return out;
+  }
+
+  function build(){
+    clear(); grid();
+    var n = parseInt(pctl.value, 10);
+    var seed = parseInt(sctl.value, 10);
+    var hide = hctl.checked;
+    var pts = makePoints(n, seed);
+
+    var dots = [], labels = [], specs = [];
+
+    pts.forEach(function(p){
+      var d = document.createElement('div');
+      d.className = 'pt';
+      chart.appendChild(d);
+      dots.push(d);
+      specs.push({ el: d, x: p.x, y: p.y });
+    });
+
+    pts.forEach(function(p, i){
+      var l = document.createElement('div');
+      l.className = 'ptlabel';
+      l.textContent = 'item ' + (i + 1) + ' · ' + p.v;
+      chart.appendChild(l);
+      labels.push(l);
+    });
+
+    var labelSpecs = pts.map(function(p, i){
+      return { el: labels[i], at: dots[i], gap: 3, placement: SIDES, hideIfBlocked: hide };
+    });
+
+    ThruSpace.layout('#chart', specs.concat(labelSpecs));
+
+    /* scoreboard */
+    var first = 0, moved = 0, hidden = 0;
+    labelSpecs.forEach(function(sp){
+      if (sp._placement === null) hidden++;
+      else if (sp._placement === SIDES[0]) first++;
+      else moved++;
+    });
+
+    function boxOf(sp){
+      return { x: sp._resolved.x, y: sp._resolved.y,
+               hw: sp.el.offsetWidth / 2, hh: sp.el.offsetHeight / 2 };
+    }
+    function hits(a, b){
+      return Math.abs(a.x - b.x) < a.hw + b.hw && Math.abs(a.y - b.y) < a.hh + b.hh;
+    }
+    var dotBoxes = specs.map(boxOf);
+    var labBoxes = labelSpecs.filter(function(sp){ return sp._placement !== null; }).map(boxOf);
+
+    var ov = 0, dd = 0, a, b;
+    for (a = 0; a < dotBoxes.length; a++){
+      for (b = a + 1; b < dotBoxes.length; b++) if (hits(dotBoxes[a], dotBoxes[b])) dd++;
+    }
+    for (a = 0; a < labBoxes.length; a++){
+      for (b = 0; b < dotBoxes.length; b++) if (hits(labBoxes[a], dotBoxes[b])) ov++;
+      for (b = a + 1; b < labBoxes.length; b++) if (hits(labBoxes[a], labBoxes[b])) ov++;
+    }
+
+    document.getElementById('sc-first').textContent = first;
+    document.getElementById('sc-moved').textContent = moved;
+    document.getElementById('sc-hidden').textContent = hidden;
+    document.getElementById('sc-ov').textContent = ov;
+    document.getElementById('sc-dd').textContent = dd;
+    document.getElementById('sc-ovbox').className = 'score ' + (ov ? 'bad' : 'ok');
+  }
+
+  pctl.addEventListener('input', function(){
+    document.getElementById('cpv').textContent = pctl.value; build();
+  });
+  sctl.addEventListener('input', function(){
+    document.getElementById('csv').textContent = sctl.value; build();
+  });
+  hctl.addEventListener('change', build);
   window.addEventListener('resize', build);
 
   build();
