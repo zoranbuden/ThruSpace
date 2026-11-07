@@ -4,13 +4,13 @@ Feedback is genuinely wanted, and it is the most useful thing you can send.
 
 ## What helps most
 
-**Tell me what you were building.** If you have ever hand-written `x = r·cos(θ)` to place something in a
-user interface, I want to know what it was, what you tried first, and where it got awkward. Open an issue
-or write to zoranbuden@gmail.com.
+**Tell me what you were building.** If you have ever fought with labels colliding on a chart or a map, I
+want to know what it was, what you tried, and what you settled for. The same goes for anything you had to
+arrange around a point by hand. Open an issue or write to zoranbuden@gmail.com.
 
-**Report what breaks.** The overlap test is axis-aligned and the solver settles conflicts in the order
-elements are given, so there are arrangements it handles badly. A short description and the item list you
-used is enough — the demo page is a fine place to reproduce it.
+**Report what breaks.** The overlap test is axis-aligned and placement is resolved in the order elements
+are given rather than optimised globally, so there are arrangements it handles badly. A short description
+and the item list you used is enough — the demo page is a fine place to reproduce it.
 
 **Say what is missing.** Nothing for headsets is built. If you need something else before this would be
 useful to you, that is worth an issue.
