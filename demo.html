@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ThruSpace — one space, square and circle</title>
+<meta name="description" content="Labels, markers and annotations placed so they do not overlap — the same arrangement every run. Ordered sides, no annealing, no random seed. Works in a rectangular frame or a circular one.">
+<title>ThruSpace — deterministic placement without overlaps</title>
 <style>
   :root{
     --bg:#0b0e14;
@@ -210,85 +211,19 @@
 
 <header class="top">
   <span class="filed">German patent application filed &middot; 10 2026 004 760.9</span>
-  <h1>One space. A square, a circle,<br>and the axes they share.</h1>
-  <p class="lede">Every layout engine in common use gives you a rectangle. If you want something arranged
-     <em>around</em> a point instead of <em>inside</em> a box, you go back to writing sine and cosine by hand.
-     ThruSpace makes both frames available at once, in two dimensions or three, and you never name which one
-     you are in.</p>
+  <h1>Things that must not overlap,<br>placed the same way every time.</h1>
+  <p class="lede">Labels collide. The usual fixes — a force simulation, simulated annealing — work well and
+     give a slightly different arrangement on every run. This one hands each element an ordered list of
+     sides and takes the first that is free, so the same input always produces the same layout. It does
+     that in a rectangular frame and in a circular one, in two dimensions or three.</p>
 </header>
 
 <section>
-  <h2>Try it</h2>
-  <p class="kicker">Drag either slider. The code below the demo does not change while you do.</p>
-
-  <div class="lab">
-    <div class="controls">
-      <div class="ctl">
-        <label>Container width — <b id="wv">820px</b></label>
-        <input type="range" id="wctl" min="260" max="820" value="820">
-      </div>
-      <div class="ctl">
-        <label>Items on the circle — <b id="cv">8</b></label>
-        <input type="range" id="cctl" min="3" max="14" value="8">
-      </div>
-    </div>
-
-    <div class="holder">
-      <div class="space" id="space">
-        <svg id="axes" aria-hidden="true"></svg>
-        <div class="plate" id="center">center</div>
-        <div class="plate" id="corner">x 70 &middot; y 78</div>
-      </div>
-    </div>
-    <p class="caption">
-      <span class="c-circle">Amber</span> is the inscribed circle, <span class="c-square">blue</span> the square and its axes.
-      Both are drawn only so you can see the frames — elements do not need them.
-    </p>
-  </div>
-
-  <div class="cols">
-    <div class="panel">
-      <h3>What you write</h3>
-<pre>ThruSpace.layout('#space', [
-  ...ThruSpace.ring('.node', { radius: 78 }),
-  { el: '#center', x: 0,  y: 0  },
-  { el: '#corner', x: 70, y: 78 }
-]);</pre>
-      <p class="caption" style="text-align:left;margin-top:12px">
-        Eight items on the circle and two in the square, in one call. No mode is declared.
-        <code>angle</code> and <code>radius</code> mean the circle; <code>x</code> and <code>y</code> mean the square.
-      </p>
-    </div>
-
-    <div class="panel">
-      <h3>What it replaces</h3>
-<pre>const n = 8, R = Math.min(w, h) / 2 * 0.78;
-for (let i = 0; i &lt; n; i++) {
-  const a = (i * 2 * Math.PI) / n;
-  el[i].style.left = (w/2 + R * Math.cos(a)
-    - el[i].offsetWidth / 2) + 'px';
-  el[i].style.top  = (h/2 - R * Math.sin(a)
-    - el[i].offsetHeight / 2) + 'px';
-}
-// re-run on every resize
-// redo the maths when n changes</pre>
-    </div>
-  </div>
-
-  <div class="panel" style="margin-top:22px">
-    <div class="tally"><span>Lines to place ten elements</span><b>4 &nbsp;·&nbsp; 11</b></div>
-    <div class="tally"><span>Trigonometry you write</span><b>none &nbsp;·&nbsp; two formulas</b></div>
-    <div class="tally"><span>Code to survive a resize</span><b>none &nbsp;·&nbsp; your own</b></div>
-    <div class="tally"><span>Code to change the item count</span><b>none &nbsp;·&nbsp; recompute</b></div>
-  </div>
-</section>
-
-<section>
   <h2>Labels that find a free side</h2>
-  <p class="kicker">This is the same solver as everywhere else on this page, pointed at the problem it is
-     most useful for. Each point is fixed — it is data, it cannot move. Each label is attached to its point
+  <p class="kicker">Each point is fixed — it is data, it cannot move. Each label is attached to its point
      and given an ordered list of sides to try. The first side that does not collide with anything already
-     placed is the one it takes.</p>
+     placed is the one it takes. Drag the point count up until labels start stepping around, then switch on
+     hiding and watch the overlap count reach zero.</p>
 
   <div class="lab">
     <div class="controls">
@@ -358,6 +293,74 @@ for (let i = 0; i &lt; n; i++) {
 </section>
 
 <section>
+  <h2>The space underneath</h2>
+  <p class="kicker">The same engine, without the labels: every container carries a rectangular frame and a
+     circle inscribed in it, sharing one origin. Drag either slider — the code below does not change while
+     you do.</p>
+
+  <div class="lab">
+    <div class="controls">
+      <div class="ctl">
+        <label>Container width — <b id="wv">820px</b></label>
+        <input type="range" id="wctl" min="260" max="820" value="820">
+      </div>
+      <div class="ctl">
+        <label>Items on the circle — <b id="cv">8</b></label>
+        <input type="range" id="cctl" min="3" max="14" value="8">
+      </div>
+    </div>
+
+    <div class="holder">
+      <div class="space" id="space">
+        <svg id="axes" aria-hidden="true"></svg>
+        <div class="plate" id="center">center</div>
+        <div class="plate" id="corner">x 70 &middot; y 78</div>
+      </div>
+    </div>
+    <p class="caption">
+      <span class="c-circle">Amber</span> is the inscribed circle, <span class="c-square">blue</span> the square and its axes.
+      Both are drawn only so you can see the frames — elements do not need them.
+    </p>
+  </div>
+
+  <div class="cols">
+    <div class="panel">
+      <h3>What you write</h3>
+<pre>ThruSpace.layout('#space', [
+  ...ThruSpace.ring('.node', { radius: 78 }),
+  { el: '#center', x: 0,  y: 0  },
+  { el: '#corner', x: 70, y: 78 }
+]);</pre>
+      <p class="caption" style="text-align:left;margin-top:12px">
+        Eight items on the circle and two in the square, in one call. No mode is declared.
+        <code>angle</code> and <code>radius</code> mean the circle; <code>x</code> and <code>y</code> mean the square.
+      </p>
+    </div>
+
+    <div class="panel">
+      <h3>What it replaces</h3>
+<pre>const n = 8, R = Math.min(w, h) / 2 * 0.78;
+for (let i = 0; i &lt; n; i++) {
+  const a = (i * 2 * Math.PI) / n;
+  el[i].style.left = (w/2 + R * Math.cos(a)
+    - el[i].offsetWidth / 2) + 'px';
+  el[i].style.top  = (h/2 - R * Math.sin(a)
+    - el[i].offsetHeight / 2) + 'px';
+}
+// re-run on every resize
+// redo the maths when n changes</pre>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:22px">
+    <div class="tally"><span>Lines to place ten elements</span><b>4 &nbsp;·&nbsp; 11</b></div>
+    <div class="tally"><span>Trigonometry you write</span><b>none &nbsp;·&nbsp; two formulas</b></div>
+    <div class="tally"><span>Code to survive a resize</span><b>none &nbsp;·&nbsp; your own</b></div>
+    <div class="tally"><span>Code to change the item count</span><b>none &nbsp;·&nbsp; recompute</b></div>
+  </div>
+</section>
+
+<section>
   <h2>How the space is defined</h2>
   <p class="kicker">There is no coordinate mode to select. The frame is inferred from the properties you set,
      so a single list can mix both, and the two frames stay registered to the same origin.</p>
@@ -385,23 +388,27 @@ for (let i = 0; i &lt; n; i++) {
 
 <section>
   <h2>Where this sits</h2>
-  <p class="kicker">Constraint solvers already spare you from computing final pixel positions, and they do it well.
-     What none of the mainstream engines offer is a non-rectangular frame.</p>
+  <p class="kicker">Label collision is an old problem with several good answers. Most resolve it by
+     simulation, which works well and gives a slightly different result on each run. Chart libraries solve
+     it internally — AG Charts takes an ordered placement array much like this one, and that is where the
+     idea came from. So the pattern is not new; what is different is that it works outside any one library,
+     it is strictly repeatable, and it does the same job in a circular frame.</p>
 
   <div class="tablewrap"><table>
     <thead>
-      <tr><th>Engine</th><th>Relative positioning</th><th>Polar / radial frame</th><th>Ranges rather than fixed values</th></tr>
+      <tr><th></th><th>Moves labels</th><th>Ordered fallback</th><th>Repeatable byte for byte</th><th>Outside a chart library</th><th>Circular frame</th></tr>
     </thead>
     <tbody>
-      <tr><td>CSS Flexbox / Grid</td><td class="mark-yes">yes</td><td class="mark-no">no</td><td class="mark-no">no</td></tr>
-      <tr><td>Android ConstraintLayout</td><td class="mark-yes">yes</td><td class="mark-no">no</td><td class="mark-no">no</td></tr>
-      <tr><td>Apple Auto Layout</td><td class="mark-yes">yes</td><td class="mark-no">no</td><td class="mark-no">inequalities only</td></tr>
-      <tr><td>ThruSpace</td><td class="mark-yes">yes</td><td class="mark-yes">yes</td><td class="mark-yes">yes, with conflict resolution</td></tr>
+      <tr><td>avoid-overlap</td><td class="mark-yes">yes</td><td class="mark-yes">yes</td><td class="mark-no">no</td><td class="mark-yes">yes</td><td class="mark-no">no</td></tr>
+      <tr><td>D3 force layout</td><td class="mark-yes">yes</td><td class="mark-no">no</td><td class="mark-no">no</td><td class="mark-yes">yes</td><td class="mark-no">no</td></tr>
+      <tr><td>Chart-library built-ins</td><td class="mark-yes">yes</td><td class="mark-no">some</td><td class="mark-no">varies</td><td class="mark-no">no</td><td class="mark-no">rarely</td></tr>
+      <tr><td>ThruSpace</td><td class="mark-yes">yes</td><td class="mark-yes">yes</td><td class="mark-yes">yes</td><td class="mark-yes">yes</td><td class="mark-yes">yes</td></tr>
     </tbody>
   </table></div>
 
   <p class="kicker" style="margin-top:20px">
-    The last column is the interesting one, and the next section is a working demonstration of it.</p>
+    The third column is the one worth arguing about: a chart rendered in a test matches the one on screen,
+    which the simulation-based approaches cannot promise.</p>
 </section>
 
 <section>
